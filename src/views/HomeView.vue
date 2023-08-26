@@ -47,7 +47,7 @@
 <script setup>
 import CardSkeleton from "../components/CardSkeleton.vue";
 import { ref } from "vue";
-import axios from "axios";
+import axios from "redaxios";
 import { useRouter } from "vue-router";
 import CityList from "../components/CityList.vue";
 

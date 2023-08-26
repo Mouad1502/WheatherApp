@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import axios from "axios";
+import axios from "redaxios";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
