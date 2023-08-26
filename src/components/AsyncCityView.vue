@@ -1,9 +1,9 @@
 <template>
-<div class="flex flex-col flex-1 items-center">
+  <div class="flex flex-col flex-1 items-center">
     <!-- Banner -->
     <div
       v-if="route.query.preview"
-      class="text-white p-4 bg-weather-secondary w-full text-center"
+      class="text-white p-4 bg-wheather-secondary w-full text-center"
     >
       <p>
         You are currently previewing this city, click the "+"
@@ -81,7 +81,7 @@
               alt=""
             />
             <p class="text-xl">
-              {{ Math.round((hourData.temp)) }}&deg;
+              {{ Math.round(hourData.temp) }}&deg;
             </p>
           </div>
         </div>
@@ -123,37 +123,59 @@
         </div>
       </div>
     </div>
+    <div
+      class="flex items-center gap-2 py-12 text-white cursor-pointer duration-150 hover:text-red-500"
+      @click="removeCity"
+    >
+      <i class="fa-solid fa-trash"></i>
+      <p>Remove City</p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import axios from 'axios';
-import { useRoute } from 'vue-router';
+import axios from "axios";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const getWeatherData = async () => {
-    try {
-        const weatherData = await axios.get(`
-        https://api.openweathermap.org/data/3.0/onecall?lat=${route.query.lat}&lon=${route.query.lng}&appid=3f3dfa803f8117f7e649c581979bebdf&units=metric`);
-        // cal current date & time
-        const localOffset = new Date().getTimezoneOffset() * 60000;
-        const utc = weatherData.data.current.dt * 1000 + localOffset;
-        weatherData.data.currentTime =
+  try {
+    const weatherData = await axios.get(
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${route.query.lat}&lon=${route.query.lng}&exclude={part}&appid=3f3dfa803f8117f7e649c581979bebdf&units=metric`
+    );
+
+    // cal current date & time
+    const localOffset = new Date().getTimezoneOffset() * 60000;
+    const utc = weatherData.data.current.dt * 1000 + localOffset;
+    weatherData.data.currentTime =
+      utc + 1000 * weatherData.data.timezone_offset;
+
+    // cal hourly weather offset
+    weatherData.data.hourly.forEach((hour) => {
+      const utc = hour.dt * 1000 + localOffset;
+      hour.currentTime =
         utc + 1000 * weatherData.data.timezone_offset;
+    });
+    await new Promise((res) => setTimeout(res, 1000))
 
-        // cal hourly weather offset
-        weatherData.data.hourly.forEach((hour) => {
-        const utc = hour.dt * 1000 + localOffset;
-        hour.currentTime =
-            utc + 1000 * weatherData.data.timezone_offset;
-        });
-
-        return weatherData.data;
-
-    } catch(err) {
-        console.log(err);
-    }
-}
+    return weatherData.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
 const weatherData = await getWeatherData();
-console.log(weatherData);
+const router = useRouter();
+const removeCity = () => {
+  const cities = JSON.parse(localStorage.getItem("savedCities"));
+  const updatedCities = cities.filter(
+    (city) => city.id !== route.query.id
+  );
+  localStorage.setItem(
+    "savedCities",
+    JSON.stringify(updatedCities)
+  );
+  router.push({
+    name: "home",
+  });
+};
 </script>
