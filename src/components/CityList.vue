@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import axios from "redaxios";
+import axios from 'axios';
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import CityCard from "./CityCard.vue";
